@@ -36,7 +36,6 @@ POSSIBILITY OF SUCH DAMAGE.  */
 #include <sys/types.h>
 
 #include "backtrace.h"
-#include "backtrace-supported.h"
 #include "internal.h"
 
 /* Create the backtrace state.  This will then be passed to all the
