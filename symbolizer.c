@@ -23,6 +23,7 @@ struct cgoSymbolizerArg {
 	const char* file;
 	uintptr_t   lineno;
 	const char* func;
+	uintptr_t   entry;
 	uintptr_t   more;
 	uintptr_t   data;
 };
@@ -66,6 +67,13 @@ static int callback(void* data, uintptr_t pc, const char* filename, int lineno, 
 static void errorCallback(void* data, const char* msg, int errnum) {
 }
 
+// Called via backtrace_syminfo.
+// Just set the entry field.
+static void syminfoCallback(void* data, uintptr_t pc, const char* symname, uintptr_t symval, uintptr_t symsize) {
+	struct cgoSymbolizerArg* arg = (struct cgoSymbolizerArg*)(data);
+	arg->entry = symval;
+}
+
 // For the details of how this is called see runtime.SetCgoSymbolizer.
 void cgoSymbolizer(void* parg) {
 	struct cgoSymbolizerArg* arg = (struct cgoSymbolizerArg*)(parg);
@@ -76,6 +84,13 @@ void cgoSymbolizer(void* parg) {
 		arg->func = more->func;
 		arg->more = more->more != NULL;
 		arg->data = (uintptr_t)(more->more);
+
+		// If returning the last file/line, we can set the
+		// entry point field.
+		if (!arg->more) {
+			backtrace_syminfo(cgoBacktraceState, arg->pc, syminfoCallback, errorCallback, (void*)arg);
+		}
+
 		return;
 	}
 	arg->file = NULL;
@@ -86,4 +101,9 @@ void cgoSymbolizer(void* parg) {
 		return;
 	}
 	backtrace_pcinfo(cgoBacktraceState, arg->pc, callback, errorCallback, (void*)(arg));
+
+	// If returning only one file/line, we can set the entry point field.
+	if (!arg->more) {
+		backtrace_syminfo(cgoBacktraceState, arg->pc, syminfoCallback, errorCallback, (void*)arg);
+	}
 }

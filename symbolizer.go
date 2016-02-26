@@ -23,5 +23,5 @@ import (
 
 func init() {
 	C.cgoSymbolizerInit(C.CString(os.Args[0]))
-	runtime.SetCgoTraceback(unsafe.Pointer(C.cgoTraceback), unsafe.Pointer(C.cgoSymbolizer))
+	runtime.SetCgoTraceback(0, unsafe.Pointer(C.cgoTraceback), unsafe.Pointer(C.cgoSymbolizer))
 }
