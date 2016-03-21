@@ -55,9 +55,7 @@ unwind(struct _Unwind_Context* context, void* data)
 }
 
 struct cgoTracebackArg {
-	uintptr_t  pc;
-	uintptr_t  sp;
-	uintptr_t  lr;
+	uintptr_t  context;
 	uintptr_t* buf;
 	uintptr_t  max;
 };
@@ -68,7 +66,7 @@ void cgoTraceback(void* parg) {
 	struct unwind_data ud;
 
 	// We can only unwind the current stack.
-	if (arg->pc != 0 || arg->sp != 0) {
+	if (arg->context != 0) {
 		arg->buf[0] = 0;
 		return;
 	}
