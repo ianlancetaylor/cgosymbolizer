@@ -56,6 +56,7 @@ unwind(struct _Unwind_Context* context, void* data)
 
 struct cgoTracebackArg {
 	uintptr_t  context;
+	uintptr_t  sigContext;
 	uintptr_t* buf;
 	uintptr_t  max;
 };
