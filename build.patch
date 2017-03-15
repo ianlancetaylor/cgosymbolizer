@@ -1,0 +1,85 @@
+diff --git a/internal/libbacktrace/atomic.c b/internal/libbacktrace/atomic.c
+index cb0ad02..7436e27 100644
+--- a/internal/libbacktrace/atomic.c
++++ b/internal/libbacktrace/atomic.c
+@@ -35,7 +35,6 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #include <sys/types.h>
+
+ #include "backtrace.h"
+-#include "backtrace-supported.h"
+ #include "internal.h"
+
+ /* This file holds implementations of the atomic functions that are
+diff --git a/internal/libbacktrace/backtrace.h b/internal/libbacktrace/backtrace.h
+index d209219..70aa4fb 100644
+--- a/internal/libbacktrace/backtrace.h
++++ b/internal/libbacktrace/backtrace.h
+@@ -34,25 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #define BACKTRACE_H
+
+ #include <stddef.h>
+-#include <stdio.h>
+-
+-/* We want to get a definition for uintptr_t, but we still care about
+-   systems that don't have <stdint.h>.  */
+-#if defined(__GLIBC__) && __GLIBC__ >= 2
+-
+-#include <stdint.h>
+-
+-#elif defined(HAVE_STDINT_H)
+-
+ #include <stdint.h>
+-
+-#else
+-
+-/* Systems that don't have <stdint.h> must provide gstdint.h, e.g.,
+-   from GCC_HEADER_STDINT in configure.ac.  */
+-#include "gstdint.h"
+-
+-#endif
++#include <stdio.h>
+
+ #ifdef __cplusplus
+ extern "C" {
+diff --git a/internal/libbacktrace/elf.c b/internal/libbacktrace/elf.c
+index 81ba344..96640b8 100644
+--- a/internal/libbacktrace/elf.c
++++ b/internal/libbacktrace/elf.c
+@@ -1,3 +1,5 @@
++// +build !windows,!darwin
++
+ /* elf.c -- Get debug data from an ELF file for backtraces.
+    Copyright (C) 2012-2016 Free Software Foundation, Inc.
+    Written by Ian Lance Taylor, Google.
+diff --git a/internal/libbacktrace/pecoff.c b/internal/libbacktrace/pecoff.c
+index c7d32aa..f809b68 100644
+--- a/internal/libbacktrace/pecoff.c
++++ b/internal/libbacktrace/pecoff.c
+@@ -1,3 +1,5 @@
++// +build windows
++
+ /* pecoff.c -- Get debug data from a PE/COFFF file for backtraces.
+    Copyright (C) 2015-2016 Free Software Foundation, Inc.
+    Adapted from elf.c by Tristan Gingold, AdaCore.
+diff --git a/internal/libbacktrace/state.c b/internal/libbacktrace/state.c
+index 93420d9..f731017 100644
+--- a/internal/libbacktrace/state.c
++++ b/internal/libbacktrace/state.c
+@@ -36,7 +36,6 @@ POSSIBILITY OF SUCH DAMAGE.  */
+ #include <sys/types.h>
+
+ #include "backtrace.h"
+-#include "backtrace-supported.h"
+ #include "internal.h"
+
+ /* Create the backtrace state.  This will then be passed to all the
+diff --git a/internal/libbacktrace/unknown.c b/internal/libbacktrace/unknown.c
+index 8d06c31..a28062b 100644
+--- a/internal/libbacktrace/unknown.c
++++ b/internal/libbacktrace/unknown.c
+@@ -1,3 +1,5 @@
++// +build darwin
++
+ /* unknown.c -- used when backtrace configury does not know file format.
+    Copyright (C) 2012-2016 Free Software Foundation, Inc.
+    Written by Ian Lance Taylor, Google.

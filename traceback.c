@@ -3,7 +3,6 @@
 // license that can be found in the LICENSE file.
 
 // +build cgo
-// +build linux
 
 #include "config.h"
 
@@ -32,7 +31,7 @@ unwind(struct _Unwind_Context* context, void* data)
 
 	if (ud->idx < 0) {
 		ud->idx++;
-		return _URC_NO_REASON; 
+		return _URC_NO_REASON;
 	}
 
 	cfa = _Unwind_GetCFA(context);

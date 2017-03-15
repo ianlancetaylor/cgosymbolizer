@@ -1,5 +1,5 @@
-/* mmapio.c -- File views using mmap.
-   Copyright (C) 2012-2015 Free Software Foundation, Inc.
+/* posix.c -- POSIX file I/O routines for the backtrace library.
+   Copyright (C) 2012-2016 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Google.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,67 +34,67 @@ POSSIBILITY OF SUCH DAMAGE.  */
 
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "backtrace.h"
 #include "internal.h"
 
-#ifndef MAP_FAILED
-#define MAP_FAILED ((void *)-1)
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
-/* This file implements file views and memory allocation when mmap is
-   available.  */
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
 
-/* Create a view of SIZE bytes from DESCRIPTOR at OFFSET.  */
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 1
+#endif
+
+/* Open a file for reading.  */
 
 int
-backtrace_get_view (struct backtrace_state *state ATTRIBUTE_UNUSED,
-		    int descriptor, off_t offset, size_t size,
-		    backtrace_error_callback error_callback,
-		    void *data, struct backtrace_view *view)
+backtrace_open (const char *filename, backtrace_error_callback error_callback,
+		void *data, int *does_not_exist)
 {
-  size_t pagesize;
-  unsigned int inpage;
-  off_t pageoff;
-  void *map;
+  int descriptor;
 
-  pagesize = getpagesize ();
-  inpage = offset % pagesize;
-  pageoff = offset - inpage;
+  if (does_not_exist != NULL)
+    *does_not_exist = 0;
 
-  size += inpage;
-  size = (size + (pagesize - 1)) & ~ (pagesize - 1);
-
-  map = mmap (NULL, size, PROT_READ, MAP_PRIVATE, descriptor, pageoff);
-  if (map == MAP_FAILED)
+  descriptor = open (filename, (int) (O_RDONLY | O_BINARY | O_CLOEXEC));
+  if (descriptor < 0)
     {
-      error_callback (data, "mmap", errno);
-      return 0;
+      if (does_not_exist != NULL && errno == ENOENT)
+	*does_not_exist = 1;
+      else
+	error_callback (data, filename, errno);
+      return -1;
     }
 
-  view->data = (char *) map + inpage;
-  view->base = map;
-  view->len = size;
+#ifdef HAVE_FCNTL
+  /* Set FD_CLOEXEC just in case the kernel does not support
+     O_CLOEXEC. It doesn't matter if this fails for some reason.
+     FIXME: At some point it should be safe to only do this if
+     O_CLOEXEC == 0.  */
+  fcntl (descriptor, F_SETFD, FD_CLOEXEC);
+#endif
 
-  return 1;
+  return descriptor;
 }
 
-/* Release a view read by backtrace_get_view.  */
+/* Close DESCRIPTOR.  */
 
-void
-backtrace_release_view (struct backtrace_state *state ATTRIBUTE_UNUSED,
-			struct backtrace_view *view,
-			backtrace_error_callback error_callback,
-			void *data)
+int
+backtrace_close (int descriptor, backtrace_error_callback error_callback,
+		 void *data)
 {
-  union {
-    const void *cv;
-    void *v;
-  } const_cast;
-
-  const_cast.cv = view->base;
-  if (munmap (const_cast.v, view->len) < 0)
-    error_callback (data, "munmap", errno);
+  if (close (descriptor) < 0)
+    {
+      error_callback (data, "close", errno);
+      return 0;
+    }
+  return 1;
 }

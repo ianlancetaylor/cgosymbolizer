@@ -10,6 +10,7 @@
 // somewhere in your program.
 package cgosymbolizer
 
+// #cgo CFLAGS: -Iinternal/include -Iinternal/libbacktrace
 // extern void cgoSymbolizerInit(char*);
 // extern void cgoTraceback(void*);
 // extern void cgoSymbolizer(void*);
