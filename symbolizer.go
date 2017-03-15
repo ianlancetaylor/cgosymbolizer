@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package symbolizer provides a cgo symbolizer based on libbacktrace.
+// Package cgosymbolizer provides a cgo symbolizer based on libbacktrace.
 // This will be used to provide a symbolic backtrace of cgo functions.
 // This package does not export any symbols.
 // To use it, add a line like
