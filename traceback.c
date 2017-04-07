@@ -5,6 +5,8 @@
 // +build cgo
 // +build linux
 
+#include "config.h"
+
 #include <stddef.h>
 #include <stdint.h>
 #include <unwind.h>
