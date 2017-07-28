@@ -1290,20 +1290,20 @@ xcoff_armem_add (struct backtrace_state *state, int descriptor,
 
   if (!backtrace_get_view (state, descriptor, 0, sizeof (b_ar_fl_hdr),
 			   error_callback, data, &view))
-    return 0;
+    goto fail;
 
   memcpy (&fl_hdr, view.data, sizeof (b_ar_fl_hdr));
 
   backtrace_release_view (state, &view, error_callback, data);
 
   if (memcmp (fl_hdr.fl_magic, AIAMAGBIG, 8) != 0)
-    return 0;
+    goto fail;
 
   memlen = strlen (member);
 
   /* Read offset of first archive member.  */
   if (!xcoff_parse_decimal (fl_hdr.fl_fstmoff, sizeof fl_hdr.fl_fstmoff, &off))
-    return 0;
+    goto fail;
   while (off != 0)
     {
       /* Map archive member header and member name.  */
@@ -1311,7 +1311,7 @@ xcoff_armem_add (struct backtrace_state *state, int descriptor,
       if (!backtrace_get_view (state, descriptor, off,
 			       sizeof (b_ar_hdr) + memlen,
 			       error_callback, data, &view))
-	return 0;
+	break;
 
       ar_hdr = (const b_ar_hdr *) view.data;
 
@@ -1347,6 +1347,7 @@ xcoff_armem_add (struct backtrace_state *state, int descriptor,
       backtrace_release_view (state, &view, error_callback, data);
     }
 
+ fail:
   /* No matching member found.  */
   backtrace_close (descriptor, error_callback, data);
   return 0;
