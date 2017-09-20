@@ -1436,7 +1436,8 @@ xcoff_add_shared_libs (struct backtrace_state *state,
    Returns 1 on success, 0 on failure.  */
 
 int
-backtrace_initialize (struct backtrace_state *state, int descriptor,
+backtrace_initialize (struct backtrace_state *state,
+		      const char *filename ATTRIBUTE_UNUSED, int descriptor,
 		      backtrace_error_callback error_callback,
 		      void *data, fileline *fileline_fn)
 {
