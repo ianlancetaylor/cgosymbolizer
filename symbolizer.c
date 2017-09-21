@@ -57,7 +57,7 @@ static int callback(void* data, uintptr_t pc, const char* filename, int lineno, 
 	more->file = filename;
 	more->lineno = lineno;
 	more->func = function;
-	for (pp = (struct cgoSymbolizerMore**)(&arg->data); *pp == NULL; pp = &(*pp)->more) {
+	for (pp = (struct cgoSymbolizerMore**)(&arg->data); *pp != NULL; pp = &(*pp)->more) {
 	}
 	*pp = more;
 	arg->more = 1;
