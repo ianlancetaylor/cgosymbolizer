@@ -37,8 +37,14 @@
 /* Define to 1 if you have the <link.h> header file. */
 #define HAVE_LINK_H 1
 
+/* Define to 1 if you have the `lstat' function. */
+#define HAVE_LSTAT 1
+
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
+
+/* Define to 1 if you have the `readlink' function. */
+#define HAVE_READLINK 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #define HAVE_STDINT_H 1
