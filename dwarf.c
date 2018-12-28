@@ -1517,7 +1517,6 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
 		   void *data, struct unit_addrs_vector *addrs)
 {
   struct dwarf_buf info;
-  struct abbrevs abbrevs;
   struct backtrace_vector units;
   size_t units_count;
   size_t i;
@@ -1542,7 +1541,6 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
   memset (&units, 0, sizeof units);
   units_count = 0;
 
-  memset (&abbrevs, 0, sizeof abbrevs);
   while (info.left > 0)
     {
       const unsigned char *unit_data_start;
@@ -1573,13 +1571,6 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
 	  goto fail;
 	}
 
-      abbrev_offset = read_offset (&unit_buf, is_dwarf64);
-      if (!read_abbrevs (state, abbrev_offset, dwarf_abbrev, dwarf_abbrev_size,
-			 is_bigendian, error_callback, data, &abbrevs))
-	goto fail;
-
-      addrsize = read_byte (&unit_buf);
-
       pu = ((struct unit **)
 	    backtrace_vector_grow (state, sizeof (struct unit *),
 				   error_callback, data, &units));
@@ -1594,6 +1585,14 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
       *pu = u;
       ++units_count;
 
+      memset (&u->abbrevs, 0, sizeof u->abbrevs);
+      abbrev_offset = read_offset (&unit_buf, is_dwarf64);
+      if (!read_abbrevs (state, abbrev_offset, dwarf_abbrev, dwarf_abbrev_size,
+			 is_bigendian, error_callback, data, &u->abbrevs))
+	goto fail;
+
+      addrsize = read_byte (&unit_buf);
+
       u->unit_data = unit_buf.buf;
       u->unit_data_len = unit_buf.left;
       u->unit_data_offset = unit_buf.buf - unit_data_start;
@@ -1604,8 +1603,6 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
       u->comp_dir = NULL;
       u->abs_filename = NULL;
       u->lineoff = 0;
-      u->abbrevs = abbrevs;
-      memset (&abbrevs, 0, sizeof abbrevs);
 
       /* The actual line number mappings will be read as needed.  */
       u->lines = NULL;
@@ -1644,7 +1641,6 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
 	}
       backtrace_vector_free (state, &units, error_callback, data);
     }
-  free_abbrevs (state, &abbrevs, error_callback, data);
   if (addrs->count > 0)
     {
       backtrace_vector_free (state, &addrs->vec, error_callback, data);
