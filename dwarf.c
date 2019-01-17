@@ -3149,7 +3149,8 @@ backtrace_dwarf_add (struct backtrace_state *state,
 		     size_t dwarf_str_size,
 		     int is_bigendian,
 		     backtrace_error_callback error_callback,
-		     void *data, fileline *fileline_fn)
+		     void *data, fileline *fileline_fn,
+		     struct dwarf_data **fileline_entry)
 {
   struct dwarf_data *fdata;
 
@@ -3160,6 +3161,9 @@ backtrace_dwarf_add (struct backtrace_state *state,
 			    error_callback, data);
   if (fdata == NULL)
     return 0;
+
+  if (fileline_entry != NULL)
+    *fileline_entry = fdata;
 
   if (!state->threaded)
     {
