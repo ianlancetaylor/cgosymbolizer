@@ -428,6 +428,8 @@ struct dwarf_data
 {
   /* The data for the next file we know about.  */
   struct dwarf_data *next;
+  /* The data for .gnu_debugaltlink.  */
+  struct dwarf_data *altlink;
   /* The base address for this file.  */
   uintptr_t base_address;
   /* A sorted list of address ranges.  */
@@ -3085,6 +3087,7 @@ build_dwarf_data (struct backtrace_state *state,
 		  const unsigned char *dwarf_str,
 		  size_t dwarf_str_size,
 		  int is_bigendian,
+		  struct dwarf_data *altlink,
 		  backtrace_error_callback error_callback,
 		  void *data)
 {
@@ -3113,6 +3116,7 @@ build_dwarf_data (struct backtrace_state *state,
     return NULL;
 
   fdata->next = NULL;
+  fdata->altlink = altlink;
   fdata->base_address = base_address;
   fdata->addrs = addrs;
   fdata->addrs_count = addrs_count;
@@ -3148,6 +3152,7 @@ backtrace_dwarf_add (struct backtrace_state *state,
 		     const unsigned char *dwarf_str,
 		     size_t dwarf_str_size,
 		     int is_bigendian,
+		     struct dwarf_data *fileline_altlink,
 		     backtrace_error_callback error_callback,
 		     void *data, fileline *fileline_fn,
 		     struct dwarf_data **fileline_entry)
@@ -3158,7 +3163,7 @@ backtrace_dwarf_add (struct backtrace_state *state,
 			    dwarf_line, dwarf_line_size, dwarf_abbrev,
 			    dwarf_abbrev_size, dwarf_ranges, dwarf_ranges_size,
 			    dwarf_str, dwarf_str_size, is_bigendian,
-			    error_callback, data);
+			    fileline_altlink, error_callback, data);
   if (fdata == NULL)
     return 0;
 
