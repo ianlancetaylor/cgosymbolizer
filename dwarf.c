@@ -214,6 +214,8 @@ struct abbrevs
 
 enum attr_val_encoding
 {
+  /* No attribute value.  */
+  ATTR_VAL_NONE,
   /* An address.  */
   ATTR_VAL_ADDRESS,
   /* A unsigned integer.  */
@@ -785,7 +787,7 @@ static int
 read_attribute (enum dwarf_form form, struct dwarf_buf *buf,
 		int is_dwarf64, int version, int addrsize,
 		const unsigned char *dwarf_str, size_t dwarf_str_size,
-		struct attr_val *val)
+		struct dwarf_data *altlink, struct attr_val *val)
 {
   /* Avoid warnings about val.u.FIELD may be used uninitialized if
      this function is inlined.  The warnings aren't valid but can
@@ -891,7 +893,7 @@ read_attribute (enum dwarf_form form, struct dwarf_buf *buf,
 	form = read_uleb128 (buf);
 	return read_attribute ((enum dwarf_form) form, buf, is_dwarf64,
 			       version, addrsize, dwarf_str, dwarf_str_size,
-			       val);
+			       altlink, val);
       }
     case DW_FORM_sec_offset:
       val->encoding = ATTR_VAL_REF_SECTION;
@@ -917,12 +919,22 @@ read_attribute (enum dwarf_form form, struct dwarf_buf *buf,
       val->u.uint = read_uleb128 (buf);
       return 1;
     case DW_FORM_GNU_ref_alt:
-      val->encoding = ATTR_VAL_REF_SECTION;
       val->u.uint = read_offset (buf, is_dwarf64);
+      if (altlink == NULL)
+	{
+	  val->encoding = ATTR_VAL_NONE;
+	  return 1;
+	}
+      val->encoding = ATTR_VAL_REF_SECTION;
       return 1;
     case DW_FORM_GNU_strp_alt:
-      val->encoding = ATTR_VAL_REF_SECTION;
       val->u.uint = read_offset (buf, is_dwarf64);
+      if (altlink == NULL)
+	{
+	  val->encoding = ATTR_VAL_NONE;
+	  return 1;
+	}
+      val->encoding = ATTR_VAL_REF_SECTION;
       return 1;
     default:
       dwarf_buf_error (buf, "unrecognized DWARF form");
@@ -1360,9 +1372,9 @@ find_address_ranges (struct backtrace_state *state, uintptr_t base_address,
 		     const unsigned char *dwarf_str, size_t dwarf_str_size,
 		     const unsigned char *dwarf_ranges,
 		     size_t dwarf_ranges_size,
-		     int is_bigendian, backtrace_error_callback error_callback,
-		     void *data, struct unit *u,
-		     struct unit_addrs_vector *addrs)
+		     int is_bigendian, struct dwarf_data *altlink,
+		     backtrace_error_callback error_callback, void *data,
+		     struct unit *u, struct unit_addrs_vector *addrs)
 {
   while (unit_buf->left > 0)
     {
@@ -1398,7 +1410,7 @@ find_address_ranges (struct backtrace_state *state, uintptr_t base_address,
 
 	  if (!read_attribute (abbrev->attrs[i].form, unit_buf,
 			       u->is_dwarf64, u->version, u->addrsize,
-			       dwarf_str, dwarf_str_size, &val))
+			       dwarf_str, dwarf_str_size, altlink, &val))
 	    return 0;
 
 	  switch (abbrev->attrs[i].name)
@@ -1496,7 +1508,7 @@ find_address_ranges (struct backtrace_state *state, uintptr_t base_address,
 	  if (!find_address_ranges (state, base_address, unit_buf,
 				    dwarf_str, dwarf_str_size,
 				    dwarf_ranges, dwarf_ranges_size,
-				    is_bigendian, error_callback, data,
+				    is_bigendian, altlink, error_callback, data,
 				    u, addrs))
 	    return 0;
 	}
@@ -1515,8 +1527,9 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
 		   const unsigned char *dwarf_abbrev, size_t dwarf_abbrev_size,
 		   const unsigned char *dwarf_ranges, size_t dwarf_ranges_size,
 		   const unsigned char *dwarf_str, size_t dwarf_str_size,
-		   int is_bigendian, backtrace_error_callback error_callback,
-		   void *data, struct unit_addrs_vector *addrs)
+		   int is_bigendian, struct dwarf_data *altlink,
+		   backtrace_error_callback error_callback, void *data,
+		   struct unit_addrs_vector *addrs)
 {
   struct dwarf_buf info;
   struct backtrace_vector units;
@@ -1617,7 +1630,7 @@ build_address_map (struct backtrace_state *state, uintptr_t base_address,
       if (!find_address_ranges (state, base_address, &unit_buf,
 				dwarf_str, dwarf_str_size,
 				dwarf_ranges, dwarf_ranges_size,
-				is_bigendian, error_callback, data,
+				is_bigendian, altlink, error_callback, data,
 				u, addrs))
 	goto fail;
 
@@ -2269,7 +2282,7 @@ read_referenced_name (struct dwarf_data *ddata, struct unit *u,
       if (!read_attribute (abbrev->attrs[i].form, &unit_buf,
 			   u->is_dwarf64, u->version, u->addrsize,
 			   ddata->dwarf_str, ddata->dwarf_str_size,
-			   &val))
+			   ddata->altlink, &val))
 	return NULL;
 
       switch (abbrev->attrs[i].name)
@@ -2481,7 +2494,7 @@ read_function_entry (struct backtrace_state *state, struct dwarf_data *ddata,
 	  if (!read_attribute (abbrev->attrs[i].form, unit_buf,
 			       u->is_dwarf64, u->version, u->addrsize,
 			       ddata->dwarf_str, ddata->dwarf_str_size,
-			       &val))
+			       ddata->altlink, &val))
 	    return 0;
 
 	  /* The compile unit sets the base address for any address
@@ -3099,7 +3112,8 @@ build_dwarf_data (struct backtrace_state *state,
   if (!build_address_map (state, base_address, dwarf_info, dwarf_info_size,
 			  dwarf_abbrev, dwarf_abbrev_size, dwarf_ranges,
 			  dwarf_ranges_size, dwarf_str, dwarf_str_size,
-			  is_bigendian, error_callback, data, &addrs_vec))
+			  is_bigendian, altlink, error_callback, data,
+			  &addrs_vec))
     return NULL;
 
   if (!backtrace_vector_release (state, &addrs_vec.vec, error_callback, data))
