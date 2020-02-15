@@ -34,6 +34,14 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
+/* Define to 1 if you have KERN_PROC and KERN_PROC_PATHNAME in <sys/sysctl.h>.
+   */
+#undef HAVE_KERN_PROC
+
+/* Define to 1 if you have KERN_PROCARGS and KERN_PROC_PATHNAME in
+   <sys/sysctl.h>. */
+#undef HAVE_KERN_PROC_ARGS
+
 /* Define to 1 if you have the <link.h> header file. */
 #define HAVE_LINK_H 1
 
