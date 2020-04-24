@@ -76,7 +76,7 @@ static void syminfoCallback(void* data, uintptr_t pc, const char* symname, uintp
 	arg->entry = symval;
 }
 
-// For the details of how this is called see runtime.SetCgoSymbolizer.
+// For the details of how this is called see runtime.SetCgoTraceback.
 void cgoSymbolizer(void* parg) {
 	struct cgoSymbolizerArg* arg = (struct cgoSymbolizerArg*)(parg);
 	if (arg->data != 0) {
