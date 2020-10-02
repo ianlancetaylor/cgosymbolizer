@@ -9,8 +9,14 @@
 #error BACKTRACE_ELF_SIZE unknown
 #endif
 
+/* XCOFF size: 32 or 64 */
+/* #undef BACKTRACE_XCOFF_SIZE */
+
 /* Define to 1 if you have the __atomic functions */
 #define HAVE_ATOMIC_FUNCTIONS 1
+
+/* Define to 1 if you have the `clock_gettime' function. */
+#define HAVE_CLOCK_GETTIME 1
 
 /* Define to 1 if you have the declaration of `getpagesize', and to 0 if you
    don't. */
@@ -40,17 +46,26 @@
 
 /* Define to 1 if you have KERN_PROC and KERN_PROC_PATHNAME in <sys/sysctl.h>.
    */
-#undef HAVE_KERN_PROC
+/* #undef HAVE_KERN_PROC */
 
 /* Define to 1 if you have KERN_PROCARGS and KERN_PROC_PATHNAME in
    <sys/sysctl.h>. */
-#undef HAVE_KERN_PROC_ARGS
+/* #undef HAVE_KERN_PROC_ARGS */
+
+/* Define if -llzma is available. */
+/* #undef HAVE_LIBLZMA */
 
 /* Define to 1 if you have the <link.h> header file. */
 #define HAVE_LINK_H 1
 
+/* Define if AIX loadquery is available. */
+/* #undef HAVE_LOADQUERY */
+
 /* Define to 1 if you have the `lstat' function. */
 #define HAVE_LSTAT 1
+
+/* Define to 1 if you have the <mach-o/dyld.h> header file. */
+/* #undef HAVE_MACH_O_DYLD_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -73,6 +88,9 @@
 /* Define to 1 if you have the __sync functions */
 #define HAVE_SYNC_FUNCTIONS 1
 
+/* Define to 1 if you have the <sys/ldr.h> header file. */
+/* #undef HAVE_SYS_LDR_H */
+
 /* Define to 1 if you have the <sys/mman.h> header file. */
 #define HAVE_SYS_MMAN_H 1
 
@@ -84,6 +102,49 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
+
+/* Define if -lz is available. */
+/* #undef HAVE_ZLIB */
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT "iant@golang.org"
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "cgosymbolizer"
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING "cgosymbolizer"
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME "cgosymbolizer"
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL "https://github.com/ianlancetaylor/cgosymbolizer"
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION "version-unused"
+
+/* The size of `char', as computed by sizeof. */
+/* #undef SIZEOF_CHAR */
+
+/* The size of `int', as computed by sizeof. */
+/* #undef SIZEOF_INT */
+
+/* The size of `long', as computed by sizeof. */
+/* #undef SIZEOF_LONG */
+
+/* The size of `short', as computed by sizeof. */
+/* #undef SIZEOF_SHORT */
+
+/* The size of `void *', as computed by sizeof. */
+/* #undef SIZEOF_VOID_P */
+
+/* Define to 1 if you have the ANSI C header files. */
+#define STDC_HEADERS 1
 
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
@@ -105,3 +166,25 @@
 #ifndef __EXTENSIONS__
 # define __EXTENSIONS__ 1
 #endif
+
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+/* #undef _FILE_OFFSET_BITS */
+
+/* Define for large files, on AIX-style hosts. */
+/* #undef _LARGE_FILES */
+
+/* Define to 1 if on MINIX. */
+/* #undef _MINIX */
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+/* #undef _POSIX_1_SOURCE */
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+/* #undef _POSIX_SOURCE */
