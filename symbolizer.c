@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "backtrace.h"
 #include "internal.h"
