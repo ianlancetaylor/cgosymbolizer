@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <unwind.h>
+#include <signal.h>
 
 struct unwind_data {
 	uintptr_t* addrs;
@@ -87,4 +88,20 @@ void cgoTraceback(void* parg) {
 	} else if (ud.idx < arg->max) {
 		arg->buf[ud.idx] = 0;
 	}
+}
+
+static void (*orig_x_cgo_callers)(uintptr_t sig, void *info, void *context, void (*cgoTraceback)(struct cgoTracebackArg*), uintptr_t* cgoCallers, void (*sigtramp)(uintptr_t, void*, void*));
+
+static void
+new_x_cgo_callers(uintptr_t sig, void *info, void *context, void (*cgoTraceback)(struct cgoTracebackArg*), uintptr_t* cgoCallers, void (*sigtramp)(uintptr_t, void*, void*)) {
+	if (sig != SIGURG) {
+		orig_x_cgo_callers(sig, info, context, cgoTraceback, cgoCallers, sigtramp);
+	} else {
+		sigtramp(sig, info, context);
+	}
+}
+
+void cgoHookCallers(void **cgoCallerPtr) {
+	orig_x_cgo_callers = *cgoCallerPtr;
+	*cgoCallerPtr = new_x_cgo_callers;
 }

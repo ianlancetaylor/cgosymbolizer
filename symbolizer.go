@@ -10,9 +10,11 @@
 // somewhere in your program.
 package cgosymbolizer
 
+// #include <stdint.h>
 // extern void cgoSymbolizerInit(char*);
 // extern void cgoTraceback(void*);
 // extern void cgoSymbolizer(void*);
+// extern void cgoHookCallers(uintptr_t cgoCallerPtr);
 import "C"
 
 import (
@@ -21,7 +23,12 @@ import (
 	"unsafe"
 )
 
+//go:linkname _cgo_callers _cgo_callers
+var _cgo_callers byte
+var _cgo_callers_ptr = uintptr(unsafe.Pointer(&_cgo_callers))
+
 func init() {
 	C.cgoSymbolizerInit(C.CString(os.Args[0]))
+	C.cgoHookCallers(C.uintptr_t(_cgo_callers_ptr))
 	runtime.SetCgoTraceback(0, unsafe.Pointer(C.cgoTraceback), nil, unsafe.Pointer(C.cgoSymbolizer))
 }
