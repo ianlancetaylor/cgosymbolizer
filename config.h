@@ -107,6 +107,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H 1
 
+/* Define to 1 if you have the <windows.h> header file. */
+/* #undef HAVE_WINDOWS_H */
+
 /* Define if -lz is available. */
 /* #undef HAVE_ZLIB */
 
