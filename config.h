@@ -1,7 +1,7 @@
 /* Hand written config.h suitable for a modern GNU/Linux system.  */
 
 /* ELF size: 32 or 64 */
-#if defined(__x86_64__) || defined(__aarch64__) || defined(__mips64) || defined(_ARCH_PPC64) || defined(__s390x__) || (defined(__riscv) && __riscv_xlen == 64)
+#if defined(__x86_64__) || defined(__aarch64__) || defined(__mips64) || defined(_ARCH_PPC64) || defined(__s390x__) || (defined(__riscv) && __riscv_xlen == 64) || defined(__loongarch64)
 #define BACKTRACE_ELF_SIZE 64
 #elif defined(__i386__) || defined(__arm__) || defined(__mips__) || defined(_ARCH_PPC) || defined(__riscv)
 #define BACKTRACE_ELF_SIZE 32
