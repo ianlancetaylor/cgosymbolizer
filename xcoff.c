@@ -514,6 +514,8 @@ xcoff_syminfo (struct backtrace_state *state ATTRIBUTE_UNUSED, uintptr_t addr,
   struct xcoff_syminfo_data *edata;
   struct xcoff_symbol *sym = NULL;
   const char *name;
+  void *mdata;
+  struct backtrace_moredata md;
 
   if (!state->threaded)
     {
@@ -549,15 +551,25 @@ xcoff_syminfo (struct backtrace_state *state ATTRIBUTE_UNUSED, uintptr_t addr,
 	}
     }
 
+  if (!state->moredata)
+    mdata = data;
+  else
+    {
+      memset (&md, 0, sizeof md);
+      md.backtrace_version = 3;
+      md.backtrace_data = data;
+      mdata = (void *) &md;
+    }
+
   if (sym == NULL)
-    callback (data, addr, NULL, 0, 0);
+    callback (mdata, addr, NULL, 0, 0);
   else
     {
       name = sym->name;
       /* AIX prepends a '.' to function entry points, remove it.  */
       if (name && *name == '.')
 	++name;
-      callback (data, addr, name, sym->address, sym->size);
+      callback (mdata, addr, name, sym->address, sym->size);
     }
 }
 
@@ -725,7 +737,7 @@ xcoff_incl_search (const void *vkey, const void *ventry)
    0 if not.  */
 
 static int
-xcoff_lookup_pc (struct backtrace_state *state ATTRIBUTE_UNUSED,
+xcoff_lookup_pc (struct backtrace_state *state,
 		 struct xcoff_fileline_data *fdata, uintptr_t pc,
 		 backtrace_full_callback callback,
 		 backtrace_error_callback error_callback ATTRIBUTE_UNUSED,
@@ -807,7 +819,18 @@ xcoff_lookup_pc (struct backtrace_state *state ATTRIBUTE_UNUSED,
   /* AIX prepends a '.' to function entry points, remove it.  */
   if (function != NULL && *function == '.')
     ++function;
-  return callback (data, pc, filename, lnno, function);
+
+  if (!state->moredata)
+    return callback (data, pc, filename, lnno, function);
+  else
+    {
+      struct backtrace_moredata md;
+
+      memset (&md, 0, sizeof md);
+      md.backtrace_version = 3;
+      md.backtrace_data = data;
+      return callback ((void *) &md, pc, filename, lnno, function);
+    }
 }
 
 /* Return the file/line information for a PC using the XCOFF lineno
@@ -857,7 +880,17 @@ xcoff_fileline (struct backtrace_state *state, uintptr_t pc,
 
   /* FIXME: See if any libraries have been dlopen'ed.  */
 
-  return callback (data, pc, NULL, 0, NULL);
+  if (!state->moredata)
+    return callback (data, pc, NULL, 0, NULL);
+  else
+    {
+      struct backtrace_moredata md;
+
+      memset (&md, 0, sizeof md);
+      md.backtrace_version = 3;
+      md.backtrace_data = data;
+      return callback ((void *) data, pc, NULL, 0, NULL);
+    }
 }
 
 /* Initialize the function vector info for xcoff_fileline.  */

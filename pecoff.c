@@ -589,6 +589,8 @@ coff_syminfo (struct backtrace_state *state, uintptr_t addr,
 {
   struct coff_syminfo_data *sdata;
   struct coff_symbol *sym = NULL;
+  void *mdata;
+  struct backtrace_moredata md;
 
   if (!state->threaded)
     {
@@ -624,10 +626,20 @@ coff_syminfo (struct backtrace_state *state, uintptr_t addr,
 	}
     }
 
-  if (sym == NULL)
-    callback (data, addr, NULL, 0, 0);
+  if (!state->moredata)
+    mdata = data;
   else
-    callback (data, addr, sym->name, sym->address, 0);
+    {
+      memset (&md, 0, sizeof md);
+      md.backtrace_version = 3;
+      md.backtrace_data = data;
+      mdata = (void *) &md;
+    }
+
+  if (sym == NULL)
+    callback (mdata, addr, NULL, 0, 0);
+  else
+    callback (mdata, addr, sym->name, sym->address, 0);
 }
 
 /* Add the backtrace data for one PE/COFF file.  Returns 1 on success,
