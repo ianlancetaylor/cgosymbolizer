@@ -631,7 +631,7 @@ coff_syminfo (struct backtrace_state *state, uintptr_t addr,
   else
     {
       memset (&md, 0, sizeof md);
-      md.backtrace_version = 3;
+      md.backtrace_version = BACKTRACE_MOREDATA_VERSION;
       md.backtrace_data = data;
       mdata = (void *) &md;
     }
